@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Search, AlertTriangle, Clock, CheckCircle2,
-  PlusCircle, Camera, Video, Mic, FileText, CalendarDays, ChevronDown
+  PlusCircle, Camera, Video, Mic, FileText, CalendarDays, ChevronDown, Sparkles
 } from "lucide-react";
 import { useIncidents, type StoredIncident } from "@/hooks/use-incidents";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,7 @@ function dateOnly(iso: string) {
 }
 
 export default function IncidentsPage() {
-  const { incidents: live } = useIncidents();
+  const { incidents: live, resetToDemoData } = useIncidents();
 
   const [query,    setQuery]    = useState("");
   const [severity, setSeverity] = useState<Severity | "all">("all");
@@ -90,22 +90,35 @@ export default function IncidentsPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-white/90">Incident Management</h1>
           <p className="text-xs text-white/40">
-            {filtered.length} incident{filtered.length !== 1 ? "s" : ""} found
+            {filtered.length} incident{filtered.length !== 1 ? "s" : ""} recorded
             {live.length > 0 && (
               <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-                {live.length} reported by you
+                Live Demo Sync Active
               </span>
             )}
           </p>
         </div>
-        <Link
-          href="/report"
-          className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-xs hover:bg-amber-400 transition-all"
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span>Report New Incident</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              resetToDemoData();
+              alert("Presentation demo data refreshed: 14 active and historic incidents restored!");
+            }}
+            className="flex items-center gap-1.5 rounded-xl bg-white/[0.04] border border-white/[0.09] px-3 py-2 text-xs font-bold text-white/70 hover:bg-white/[0.08] hover:text-white transition-all shadow-sm"
+            title="Reload presentation demo dataset"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span>Reset Demo Data</span>
+          </button>
+          <Link
+            href="/report"
+            className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-xs hover:bg-amber-400 transition-all"
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Report Incident</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filter Bar */}

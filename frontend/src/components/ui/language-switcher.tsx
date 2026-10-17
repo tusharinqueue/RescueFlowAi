@@ -36,10 +36,10 @@ export function LanguageSwitcher() {
       <button
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-bold transition-all",
+          "flex items-center gap-1.5 h-8 rounded-lg border px-2.5 text-xs font-medium transition-all",
           open
-            ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
-            : "bg-white/[0.06] border-white/[0.08] text-white/60 hover:bg-white/[0.10] hover:text-white/80"
+            ? "bg-white/[0.08] border-white/20 text-white"
+            : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white"
         )}
         aria-label="Switch language"
       >

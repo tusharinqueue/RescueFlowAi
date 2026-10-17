@@ -5,10 +5,12 @@ import { Users, Radio, Play, CheckCircle2, PhoneCall, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const RESPONSE_TEAMS = [
-  { id: "TEAM-1", name: "Fire Safety Unit", lead: "Captain R. Sharma", members: 6, status: "DISPATCHED", zone: "Welding Zone B", phone: "+91 98765 43210" },
-  { id: "TEAM-2", name: "HazMat Control Team", lead: "Dr. A. Verma", members: 4, status: "DISPATCHED", zone: "Zone C Chemical Bay", phone: "+91 98765 43211" },
-  { id: "TEAM-3", name: "First Aid & Medical Unit", lead: "Nurse K. Patel", members: 5, status: "STANDBY", zone: "Medical Station 1", phone: "+91 98765 43212" },
-  { id: "TEAM-4", name: "Site Security & Patrol", lead: "Officer S. Kumar", members: 8, status: "ON PATROL", zone: "Perimeter Sector D", phone: "+91 98765 43213" },
+  { id: "TEAM-1", name: "Fire Safety Unit (Heavy Foam)", lead: "Captain R. Sharma", members: 6, status: "DISPATCHED", zone: "Film City Sector 16A", phone: "+91 98765 43210" },
+  { id: "TEAM-2", name: "HazMat Level-2 Containment", lead: "Dr. A. Verma", members: 4, status: "DISPATCHED", zone: "Sector 10 Industrial Buffer", phone: "+91 98765 43211" },
+  { id: "TEAM-3", name: "Advanced EMS-108 Trauma Unit", lead: "Dr. P. Nair", members: 4, status: "ON PATROL", zone: "Microsoft Sovereign Office", phone: "+91 98765 43212" },
+  { id: "TEAM-4", name: "Police PCR Patrol-09 (Noida)", lead: "Inspector V. Chauhan", members: 3, status: "ON PATROL", zone: "Sector 18 Commercial Post", phone: "+91 98765 43213" },
+  { id: "TEAM-5", name: "Structural Drone Recon Squad", lead: "Eng. S. Gupta", members: 3, status: "STANDBY", zone: "Elevated Flyover Pillar #4", phone: "+91 98765 43214" },
+  { id: "TEAM-6", name: "Expressway Highway Extrication", lead: "Officer K. Rao", members: 5, status: "STANDBY", zone: "DND Flyway Slipway", phone: "+91 98765 43215" },
 ];
 
 export default function DispatchPage() {

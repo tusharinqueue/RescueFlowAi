@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 // Use the unified alias to avoid hitting quota restrictions on pinned legacy versions
-const GEMINI_MODEL   = "gemini-flash-lite-latest";
-const GEMINI_URL     = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_MODEL = "gemini-flash-lite-latest";
 
 export interface AnalyzeRequest {
   description: string;
@@ -49,8 +47,11 @@ export async function POST(req: NextRequest) {
     const body: AnalyzeRequest = await req.json();
     const { description, location, method, imageBase64, imageMime } = body;
 
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
     // Use mock data immediately if key is missing or appears obviously invalid/fake
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("your_gemini_key") || GEMINI_API_KEY.length < 10) {
+    if (!apiKey || apiKey.includes("your_gemini_key") || apiKey.length < 10) {
       console.log("Using mock data due to missing or invalid Gemini API key.");
       // Small delay to simulate processing
       await new Promise(r => setTimeout(r, 2500));
@@ -105,7 +106,7 @@ ${imageBase64 ? "NOTE: An image has been attached. Count ALL visible workers/peo
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds
 
     try {
-      const geminiRes = await fetch(GEMINI_URL, {
+      const geminiRes = await fetch(geminiUrl, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(geminiBody),

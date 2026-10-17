@@ -34,10 +34,16 @@ backend/*/rescueflow/
 # ─── Environment variables ───────────────────────────────────────────────────
 .env
 .env.local
-.env.*.local
+.env.*
 *.env
+frontend/.env
+frontend/.env.local
+frontend/.env.*
+!.env.example
+!frontend/.env.example
 
 # ─── Agent & Scratch Files ───────────────────────────────────────────────────
+.impeccable/
 .brain/
 .agents/
 scratch/

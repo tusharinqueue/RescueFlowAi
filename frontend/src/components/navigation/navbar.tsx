@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronRight, AlertTriangle, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Bell, ChevronRight, AlertTriangle, Menu, X, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 import { NotificationPanel } from "@/components/ui/notification-panel";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Sidebar } from "@/components/navigation/sidebar";
@@ -17,37 +17,56 @@ function useBreadcrumbs(t: (key: any) => string) {
     { label: t("breadcrumb_home"), href: "/dashboard" },
   ];
   const routeMap: Record<string, any> = {
-    "/dashboard":         "route_dashboard",
-    "/incidents":         "route_incidents",
-    "/dispatch":          "route_dispatch",
-    "/analytics":         "route_analytics",
-    "/map":               "route_map",
-    "/settings":          "route_settings",
-    "/settings/profile":  "route_profile",
-    "/report":            "route_report",
+    "/dashboard":        "route_dashboard",
+    "/incidents":        "route_incidents",
+    "/dispatch":         "route_dispatch",
+    "/analytics":        "route_analytics",
+    "/map":              "route_map",
+    "/settings":         "route_settings",
+    "/settings/profile": "route_profile",
+    "/report":           "route_report",
   };
   let built = "";
   for (const seg of segments) {
     built += `/${seg}`;
     const key = routeMap[built];
-    const label = key ? t(key) : seg.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const label = key
+      ? t(key)
+      : seg.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
     crumbs.push({ label, href: built });
   }
   return crumbs;
 }
 
+function LiveClock() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const update = () => {
+      setTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="hidden lg:flex items-center gap-1.5 h-8 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5">
+      <Clock className="h-3.5 w-3.5 text-amber-400/70" />
+      <span className="font-mono text-xs font-medium text-white/60 tracking-wider">{time}</span>
+    </div>
+  );
+}
+
 export function Navbar() {
-  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifOpen,      setNotifOpen]      = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t }       = useLanguage();
   const crumbs      = useBreadcrumbs(t);
-  
   const { incidents } = useIncidents();
-  // We treat "pending" incidents as new/unread notifications
-  const unreadCount = incidents.filter(i => i.status === "pending").length;
-  
-  // Generic user initials since we don't have real auth yet
-  const initials    = "SO"; // Safety Officer
+
+  // Pending = unread
+  const unreadCount   = incidents.filter(i => i.status === "pending").length;
+  const criticalCount = incidents.filter(i => i.severity === "critical" && i.status !== "resolved").length;
+  const initials      = "SO";
 
   return (
     <>
@@ -55,66 +74,94 @@ export function Navbar() {
         aria-label="Top navigation bar"
         className="flex h-14 shrink-0 items-center justify-between px-4 md:px-6 z-30 glass-navbar"
       >
-        <div className="flex items-center gap-2">
-          {/* Mobile Menu Toggle */}
+        {/* Left */}
+        <div className="flex items-center gap-3">
+          {/* Mobile menu toggle */}
           <button
+            id="mobile-menu-btn"
             onClick={() => setMobileMenuOpen(true)}
-            className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/70 hover:bg-white/[0.1] hover:text-white md:hidden"
+            aria-label="Open navigation menu"
+            className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/[0.05] border border-white/[0.07] text-white/60 hover:bg-white/[0.09] hover:text-white transition-colors duration-200 md:hidden"
           >
             <Menu className="h-4 w-4" />
           </button>
 
-          {/* Left: breadcrumb */}
-          <nav aria-label="Breadcrumbs" className="hidden sm:flex items-center gap-1.5 text-xs text-white/40">
-          {crumbs.map((crumb, idx) => {
-            const isLast = idx === crumbs.length - 1;
-            return (
-              <span key={`${crumb.href}-${idx}`} className="flex items-center gap-1.5">
-                {idx > 0 && <ChevronRight className="h-3 w-3 text-white/20" aria-hidden="true" />}
-                {isLast ? (
-                  <span className="font-semibold text-white/80">{crumb.label}</span>
-                ) : (
-                  <Link href={crumb.href} className="hover:text-white/70 transition-colors font-medium">
-                    {crumb.label}
-                  </Link>
-                )}
-              </span>
-            );
-          })}
-        </nav>
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumbs" className="hidden sm:flex items-center gap-1.5 text-xs text-white/35">
+            {crumbs.map((crumb, idx) => {
+              const isLast = idx === crumbs.length - 1;
+              return (
+                <span key={`${crumb.href}-${idx}`} className="flex items-center gap-1.5">
+                  {idx > 0 && (
+                    <ChevronRight className="h-3 w-3 text-white/18" aria-hidden="true" />
+                  )}
+                  {isLast ? (
+                    <span className="font-bold text-white/80">{crumb.label}</span>
+                  ) : (
+                    <Link
+                      href={crumb.href}
+                      className="font-medium hover:text-white/65 transition-colors duration-200"
+                    >
+                      {crumb.label}
+                    </Link>
+                  )}
+                </span>
+              );
+            })}
+          </nav>
+
+          {/* Critical alert pill (visible when critical incidents exist) */}
+          {criticalCount > 0 && (
+            <Link
+              href="/incidents"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl bg-red-500/12 border border-red-500/25 px-2.5 py-1 text-[10px] font-bold text-red-400 hover:bg-red-500/20 transition-all duration-200 animate-alert"
+            >
+              <AlertTriangle className="h-3 w-3" />
+              {criticalCount} Critical
+            </Link>
+          )}
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Language Switcher — replaces search */}
+        <div className="flex items-center gap-2">
+          {/* Live clock */}
+          <LiveClock />
+
+          {/* Language switcher */}
           <LanguageSwitcher />
 
-          {/* Report Incident CTA */}
+          {/* Report CTA */}
           <Link
             href="/report"
-            className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 hover:bg-amber-400 transition-all shadow-[0_0_16px_rgba(245,158,11,0.3)]"
+            id="navbar-report-btn"
+            className="flex items-center gap-1.5 h-8 rounded-lg bg-amber-500 hover:bg-amber-400 px-3 text-xs font-semibold text-slate-950 transition-all duration-150 shadow-sm"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            <span>{t("dashboard_report_btn")}</span>
+            <span className="hidden sm:inline">{t("dashboard_report_btn")}</span>
+            <span className="sm:hidden">SOS</span>
           </Link>
 
           {/* Notifications */}
           <button
+            id="notif-btn"
             onClick={() => setNotifOpen(true)}
-            className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/50 hover:bg-white/[0.10] hover:text-white/80 transition-colors"
+            aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white transition-colors duration-150"
           >
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-extrabold text-white shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white">
                 {unreadCount}
               </span>
             )}
           </button>
 
-          {/* User Avatar */}
+          {/* User avatar */}
           <Link
             href="/settings/profile"
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400/15 text-amber-400 font-bold text-xs ring-1 ring-amber-400/25 hover:ring-amber-400/50 hover:bg-amber-400/20 transition-all"
+            id="user-avatar-btn"
+            aria-label="Go to profile settings"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 border border-amber-400/25 text-amber-400 font-bold text-xs hover:border-amber-400/50 hover:bg-amber-500/20 transition-all duration-150"
           >
             {initials}
           </Link>
@@ -122,16 +169,20 @@ export function Navbar() {
       </header>
 
       <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
-      
+
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="relative z-50 h-full w-[240px] flex-col shadow-2xl animate-in slide-in-from-left duration-200">
+        <div className="fixed inset-0 z-50 flex md:hidden animate-fade-in">
+          <div
+            className="fixed inset-0 bg-black/65 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="relative z-50 h-full w-[248px] flex-col shadow-2xl animate-slide-left">
             <Sidebar isMobile onClose={() => setMobileMenuOpen(false)} />
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-4 -right-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
+              aria-label="Close navigation menu"
+              className="absolute top-4 -right-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/12 text-white hover:bg-white/20 backdrop-blur-md transition-colors duration-200"
             >
               <X className="h-4 w-4" />
             </button>

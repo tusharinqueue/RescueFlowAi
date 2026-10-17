@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Experimental features
-  experimental: {
-    typedRoutes: false,
-  },
+  typedRoutes: false,
 
   // Image optimisation – add domains as services are integrated
   images: {

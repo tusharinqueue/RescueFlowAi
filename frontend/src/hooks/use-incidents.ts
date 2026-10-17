@@ -30,6 +30,8 @@ export interface StoredIncident {
   mediaBlob?:     Blob | undefined; // We can now store raw files safely in IndexedDB!
 }
 
+import { DEMO_INCIDENTS } from "@/lib/demo-data";
+
 // ── Native IndexedDB Helper ─────────────────────────────────────────────────
 function getDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -63,17 +65,26 @@ async function loadFromIDB(): Promise<StoredIncident[]> {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, "readonly");
       const req = tx.objectStore(STORE_NAME).get(STORAGE_KEY);
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        const data = req.result;
+        if (Array.isArray(data) && data.length > 0) {
+          resolve(data);
+        } else {
+          // Initialize fresh storage with presentation dummy dataset
+          saveToIDB(DEMO_INCIDENTS);
+          resolve(DEMO_INCIDENTS);
+        }
+      };
+      req.onerror = () => resolve(DEMO_INCIDENTS);
     });
   } catch {
-    return [];
+    return DEMO_INCIDENTS;
   }
 }
 
 // ── Hook ────────────────────────────────────────────────────────────────────
 export function useIncidents() {
-  const [incidents, setIncidents] = useState<StoredIncident[]>([]);
+  const [incidents, setIncidents] = useState<StoredIncident[]>(DEMO_INCIDENTS);
 
   // Hydrate async on mount
   useEffect(() => {
@@ -96,10 +107,16 @@ export function useIncidents() {
     });
   }, []);
 
+  const resetToDemoData = useCallback(() => {
+    saveToIDB(DEMO_INCIDENTS);
+    setIncidents(DEMO_INCIDENTS);
+  }, []);
+
   const clearAll = useCallback(() => {
     saveToIDB([]);
     setIncidents([]);
   }, []);
 
-  return { incidents, addIncident, updateStatus, clearAll };
+  return { incidents, addIncident, updateStatus, resetToDemoData, clearAll };
 }
+

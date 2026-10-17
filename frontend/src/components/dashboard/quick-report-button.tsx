@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, Phone, Shield, Zap } from "lucide-react";
+import { DangerZoneAlertsButton } from "@/components/dashboard/danger-zone-alerts-button";
 
 export function QuickReportButton() {
   return (
@@ -42,6 +43,11 @@ export function QuickReportButton() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
         </motion.div>
+
+        {/* Danger Zone Alerts ON / OFF Toggle */}
+        <div className="mt-3 w-full">
+          <DangerZoneAlertsButton variant="sidebar" />
+        </div>
 
         {/* Emergency contacts */}
         <div className="mt-5 w-full space-y-2 border-t border-white/[0.06] pt-4">
